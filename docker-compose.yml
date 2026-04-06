@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - library-net
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  book-service:
+    build: ./book-service
+    container_name: book-service
+    ports:
+      - "8081:8081"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/librarydb
+    networks:
+      - library-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  member-service:
+    build: ./member-service
+    container_name: member-service
+    ports:
+      - "8082:8082"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/librarydb
+    networks:
+      - library-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  borrow-service:
+    build: ./borrow-service
+    container_name: borrow-service
+    ports:
+      - "8083:8083"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/librarydb
+      - BOOK_SERVICE_URL=http://book-service:8081
+      - MEMBER_SERVICE_URL=http://member-service:8082
+    networks:
+      - library-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      book-service:
+        condition: service_started
+      member-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    networks:
+      - library-net
+    depends_on:
+      - book-service
+      - member-service
+      - borrow-service
+
+networks:
+  library-net:
+    driver: bridge
