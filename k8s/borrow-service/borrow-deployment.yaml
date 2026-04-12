@@ -1,47 +1,25 @@
-apiVersion: apps/v1
+apiVersion: apps/deployment
 kind: Deployment
 metadata:
-  name: borrow-service
-  namespace: library-app
+  name: borrow-deployment
+  labels:
+    app: borrow-service
+
 spec:
   replicas: 2
+
   selector:
     matchLabels:
       app: borrow-service
+
   template:
     metadata:
       labels:
         app: borrow-service
+
     spec:
       containers:
-      - name: borrow-service
-        image: borrow-service:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 8083
-        env:
-        - name: MONGO_URI
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: MONGO_URI
-        - name: BOOK_SERVICE_URL
-          value: http://book-service:8081
-        - name: MEMBER_SERVICE_URL
-          value: http://member-service:8082
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: borrow-service
-  namespace: library-app
-spec:
-  selector:
-    app: borrow-service
-  ports:
-  - port: 8083
-    targetPort: 8083
+        - name: borrow-container
+          image: googleyy/borrowservice:v1
+          ports:
+            - containerPorts: 8082
