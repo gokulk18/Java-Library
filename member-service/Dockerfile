@@ -2,7 +2,7 @@ FROM node:18-eclipse-temurin-17-alpine as build
 
 WORKDIR /app
 
-COPY pom.xml
+COPY pom.xml .
 
 RUN mvn dependency:go-offline
 
