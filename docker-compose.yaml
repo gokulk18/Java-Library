@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-
+  
   mongodb:
     image: mongo:6
     container_name: mongo-container
@@ -11,6 +11,7 @@ services:
       - mongo_data:/data/db
     networks:
       - library-net
+
 
   book-service:
     build: ./book-service
@@ -24,26 +25,32 @@ services:
     depends_on:
       - mongodb
 
+      
+
   borrow-service:
     build: ./borrow-service
-    container_name: borrow-service
+    container_name: borrow-container
     ports:
       - "8002:8002"
     environment:
       - MONGO_URI=mongodb://mongodb:27017/librarydb
-
     networks:
       - library-net
+    depends_on:
+      - mongodb
+  
 
   frontend:
     build: ./frontend
-    container_name: frontend
+    container_name: frontend-container
     ports:
       - "3000:80"
-    environment:
-      - MONGO_URI=mongodb://mongodb:27017/librarydb
     networks:
       - library-net
+    depends_on:
+      - book-service
+      - borrow-service
+      - member-service
 
   member-service:
     build: ./member-service
@@ -54,6 +61,8 @@ services:
       - MONGO_URI=mongodb://mongodb:27017/librarydb
     networks:
       - library-net
+    depends_on:
+      - mongodb
 
 networks:
   library-net:
@@ -62,7 +71,3 @@ networks:
 volumes:
   mongo_data:
 
-
-
-  
-    
