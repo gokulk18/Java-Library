@@ -31,7 +31,7 @@ services:
     build: ./borrow-service
     container_name: borrow-container
     ports:
-      - "8082:8082"
+      - "8083:8083"
     environment:
       - MONGO_URI=mongodb://mongodb:27017/librarydb
     networks:
@@ -56,7 +56,7 @@ services:
     build: ./member-service
     container_name: member-container
     ports:
-      - "8083:8083"
+      - "8082:8082"
     environment:
       - MONGO_URI=mongodb://mongodb:27017/librarydb
     networks:
