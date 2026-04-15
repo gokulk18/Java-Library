@@ -5,8 +5,8 @@ import { Book, Users, BookOpen, Plus, Edit2, Trash2, CheckCircle, XCircle } from
 // API Configuration
 const hostname = window.location.hostname;
 const BO_API = `http://${hostname}:8081/api/books`;
-const ME_API = `http://${hostname}:8082/api/members`;
-const BR_API = `http://${hostname}:8083/api/borrows`;
+const ME_API = `http://${hostname}:8083/api/members`;
+const BR_API = `http://${hostname}:8082/api/borrows`;
 
 function App() {
   const [activeTab, setActiveTab] = useState('books');
