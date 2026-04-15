@@ -1,15 +1,20 @@
-# Build stage
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-17-alpine as build
+
 WORKDIR /app
-COPY pom.xml .
-# Download dependencies
+
 RUN mvn dependency:go-offline
-COPY src ./src
+
+COPY . . 
+
 RUN mvn package -DskipTests
 
-# Run stage
-FROM eclipse-temurin:17-jre-alpine
+
+FROM eclipse-temurin-17-jdk 
+
 WORKDIR /app
-COPY --from=build /app/target/borrow-service-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8083
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8002
+
+CMD ["java","-jar","app.jar"]

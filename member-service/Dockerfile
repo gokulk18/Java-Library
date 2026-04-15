@@ -1,15 +1,23 @@
-# Build stage
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
-WORKDIR /app
-COPY pom.xml .
-# Download dependencies
-RUN mvn dependency:go-offline
-COPY src ./src
-RUN mvn package -DskipTests
+FROM node:18-eclipse-temurin-17-alpine as build
 
-# Run stage
-FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/member-service-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8082
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+COPY pom.xml
+
+RUN mvn dependency:go-offline
+
+COPY . .
+
+RUN mvn package -Dskiptests
+
+
+FROM eclipse-temurin-17-jdk 
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8003
+
+CMD ["java","-jar","app.jar"]
+
